@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Buhle! 🎂✨</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        roseGold: '#B76E79',
+                        roseGoldLight: '#E8C5C8',
+                        blushPink: '#FFF0F2',
+                        warmCream: '#FDFBF7',
+                        softWine: '#6B2D39',
+                        deepCrimson: '#8B0000',
+                        charcoal: '#2D2926',
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                        cursive: ['Great Vibes', 'cursive'],
+                    },
+                    animation: {
+                        'float-slow': 'float 6s ease-in-out infinite',
+                        'flicker': 'flicker 1.2s infinite alternate ease-in-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        },
+                        flicker: {
+                            '0%': { opacity: '0.85', transform: 'scale(1) rotate(-1deg)' },
+                            '50%': { opacity: '1', transform: 'scale(1.12) rotate(1deg)' },
+                            '100%': { opacity: '0.8', transform: 'scale(0.95) rotate(0deg)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FDFBF7;
+            color: #2D2926;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(232, 197, 200, 0.6);
+            box-shadow: 0 10px 30px -10px rgba(183, 110, 121, 0.15);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 35px -10px rgba(183, 110, 121, 0.25);
+            border-color: rgba(183, 110, 121, 0.8);
+        }
+
+        /* Flame and Smoke */
+        .flame {
+            background: radial-gradient(ellipse at bottom, #FFD700 0%, #FF4500 70%, transparent 100%);
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 12px #FFD700, 0 0 25px #FF4500;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .candle-out .flame {
+            opacity: 0 !important;
+            transform: scale(0) !important;
+            pointer-events: none;
+        }
+        .smoke {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .candle-out .smoke {
+            animation: smokeRise 1.4s forwards ease-out;
+        }
+
+        @keyframes smokeRise {
+            0% { opacity: 0.8; transform: translateY(0) scale(0.5); }
+            100% { opacity: 0; transform: translateY(-40px) scale(2); }
+        }
+
+        /* Click Heart Burst */
+        .click-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            animation: burst 1.2s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
+
+        @keyframes burst {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+            50% { opacity: 0.9; transform: translate(-50%, -80px) scale(1.2) rotate(15deg); }
+            100% { opacity: 0; transform: translate(-50%, -130px) scale(1.5) rotate(-15deg); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FDFBF7; }
+        ::-webkit-scrollbar-thumb { background: #E8C5C8; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #B76E79; }
+    </style>
+</head>
+<body class="font-sans antialiased text-charcoal relative">
+
+    <!-- Particle Canvas for ambient heart floating -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 w-full z-50 bg-white/85 backdrop-blur-md border-b border-roseGoldLight/40 transition-all">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="#" class="font-serif text-xl sm:text-2xl font-bold tracking-wide text-softWine flex items-center gap-2">
+                <span>Buhle's Birthday</span>
+                <i class="fa-solid fa-cake-candles text-xs text-roseGold animate-pulse"></i>
+            </a>
+            <div class="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm font-medium text-charcoal/80">
+                <a href="#cake" class="hover:text-roseGold transition-colors">Candles</a>
+                <a href="#open-when" class="hover:text-roseGold transition-colors hidden sm:inline-block">Open When</a>
+                <a href="#notes" class="hover:text-roseGold transition-colors">Wishes</a>
+                <a href="#reasons" class="hover:text-roseGold transition-colors">Gratitude</a>
+                <button onclick="triggerBirthdayCelebration()" class="px-3.5 py-1.5 rounded-full bg-roseGold text-white hover:bg-softWine transition-all shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-gift text-xs"></i>
+                    <span class="hidden sm:inline">Celebrate</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="min-h-screen flex flex-col justify-center items-center relative pt-20 px-4 text-center z-10">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blushPink border border-roseGoldLight/80 text-softWine text-xs sm:text-sm font-semibold mb-6 animate-float-slow shadow-sm">
+            <i class="fa-solid fa-crown text-roseGold"></i> Happy Birthday Queen Buhle! ✨
+        </div>
+
+        <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-softWine tracking-tight mb-4 leading-tight">
+            Happy Birthday, <span class="font-cursive text-roseGold font-normal block sm:inline text-6xl sm:text-7xl md:text-9xl">Buhle!</span>
+        </h1>
+
+        <p class="max-w-2xl text-base sm:text-lg md:text-xl text-charcoal/80 leading-relaxed mb-8 px-2">
+            Today the world celebrates the wonderful day you were born! May your day be filled with endless laughter, sweet surprises, and all the warmth you bring to everyone around you.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <a href="#cake" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-roseGold text-white font-medium hover:bg-softWine transition-all duration-300 shadow-lg shadow-roseGold/20 hover:shadow-roseGold/40 flex items-center justify-center gap-2 group">
+                <span>Blow Your Candles</span>
+                <i class="fa-solid fa-wand-magic-sparkles text-xs group-hover:rotate-12 transition-transform"></i>
+            </a>
+            <button onclick="triggerBirthdayCelebration()" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-softWine border border-roseGoldLight font-medium hover:bg-blushPink transition-all duration-300 flex items-center justify-center gap-2 shadow-sm">
+                <i class="fa-solid fa-heart text-roseGold"></i> Send Birthday Love
+            </button>
+        </div>
+
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-roseGoldLight animate-bounce pointer-events-none">
+            <i class="fa-solid fa-chevron-down text-xl"></i>
+        </div>
+    </header>
+
+    <!-- SECTION: INTERACTIVE BIRTHDAY CAKE CANDLES -->
+    <section id="cake" class="py-20 px-4 max-w-4xl mx-auto text-center relative z-10">
+        <div class="glass-card rounded-3xl p-8 sm:p-12 relative overflow-hidden border border-roseGoldLight/60">
+            <span class="text-xs font-bold uppercase tracking-widest text-roseGold block mb-2">Interactive Wish</span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-softWine mb-2">Make a Birthday Wish!</h2>
+            <p id="candleStatus" class="text-sm sm:text-base text-charcoal/70 mb-8 transition-colors">Tap or click each candle flame to blow it out!</p>
+
+            <!-- Virtual Birthday Cake -->
+            <div class="relative w-64 sm:w-80 mx-auto pt-16 pb-6 select-none">
+                <!-- Candles Container -->
+                <div class="flex justify-center items-end gap-6 sm:gap-8 mb-[-2px] relative z-20">
+                    <!-- Candle 1 -->
+                    <div id="candle1" onclick="blowCandle('candle1')" class="candle-wrapper cursor-pointer flex flex-col items-center group touch-manipulation">
+                        <div class="smoke text-xs text-charcoal/40 font-bold mb-1">☁️</div>
+                        <div class="flame w-4 h-6 mb-1 animate-flicker"></div>
+                        <div class="w-1 h-3 bg-charcoal/60 rounded-t"></div>
+                        <div class="w-4 h-16 bg-gradient-to-b from-roseGoldLight to-roseGold rounded-t-sm shadow-inner"></div>
+                    </div>
+
+                    <!-- Candle 2 (Middle) -->
+                    <div id="candle2" onclick="blowCandle('candle2')" class="candle-wrapper cursor-pointer flex flex-col items-center group touch-manipulation">
+                        <div class="smoke text-xs text-charcoal/40 font-bold mb-1">☁️</div>
+                        <div class="flame w-5 h-7 mb-1 animate-flicker"></div>
+                        <div class="w-1 h-3 bg-charcoal/60 rounded-t"></div>
+                        <div class="w-4.5 h-20 bg-gradient-to-b from-blushPink to-softWine rounded-t-sm shadow-inner"></div>
+                    </div>
+
+                    <!-- Candle 3 -->
+                    <div id="candle3" onclick="blowCandle('candle3')" class="candle-wrapper cursor-pointer flex flex-col items-center group touch-manipulation">
+                        <div class="smoke text-xs text-charcoal/40 font-bold mb-1">☁️</div>
+                        <div class="flame w-4 h-6 mb-1 animate-flicker"></div>
+                        <div class="w-1 h-3 bg-charcoal/60 rounded-t"></div>
+                        <div class="w-4 h-16 bg-gradient-to-b from-roseGoldLight to-roseGold rounded-t-sm shadow-inner"></div>
+                    </div>
+                </div>
+
+                <!-- Cake Layers -->
+                <div class="w-full h-16 bg-gradient-to-r from-roseGoldLight via-blushPink to-roseGoldLight rounded-t-3xl border-t-4 border-white shadow-md relative overflow-hidden flex items-center justify-center">
+                    <span class="text-xs font-serif italic text-softWine opacity-70 font-semibold tracking-wide">Happy Birthday Buhle</span>
+                </div>
+                <div class="w-[110%] -ml-[5%] h-20 bg-gradient-to-r from-softWine via-roseGold to-softWine rounded-b-3xl border-t-4 border-blushPink shadow-lg flex items-center justify-center">
+                    <div class="flex gap-4 text-white/40 text-xs">
+                        <i class="fa-solid fa-heart"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-heart"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+                <!-- Cake Plate -->
+                <div class="w-[125%] -ml-[12.5%] h-4 bg-gray-200/90 rounded-full shadow-md mt-1 border-t border-white"></div>
+            </div>
+
+            <button onclick="relightCandles()" class="mt-8 text-xs font-semibold text-roseGold hover:text-softWine underline transition-colors inline-flex items-center gap-1">
+                <i class="fa-solid fa-rotate-left"></i> Relight Candles
+            </button>
+        </div>
+    </section>
+
+    <!-- SECTION: OPEN WHEN (BIRTHDAY EDITION) -->
+    <section id="open-when" class="py-20 px-4 max-w-5xl mx-auto relative z-10">
+        <div class="text-center mb-12">
+            <span class="text-xs font-bold uppercase tracking-widest text-roseGold block mb-2">Birthday Special Notes</span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-softWine">Open When Birthday Wishes...</h2>
+            <p class="text-sm sm:text-base text-charcoal/70 mt-2 max-w-lg mx-auto">Click any envelope below to unlock a tailored birthday note, Buhle.</p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
+            <button onclick="selectMood('morning')" class="mood-btn p-4 rounded-2xl bg-white border border-roseGoldLight/40 hover:border-roseGold text-center transition-all duration-300 hover:-translate-y-1 shadow-sm" data-mood="morning">
+                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-blushPink flex items-center justify-center text-roseGold text-lg">
+                    <i class="fa-solid fa-sun"></i>
+                </div>
+                <span class="text-xs sm:text-sm font-semibold text-charcoal block">First Thing Morning</span>
+            </button>
+
+            <button onclick="selectMood('valued')" class="mood-btn p-4 rounded-2xl bg-white border border-roseGoldLight/40 hover:border-roseGold text-center transition-all duration-300 hover:-translate-y-1 shadow-sm" data-mood="valued">
+                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-blushPink flex items-center justify-center text-roseGold text-lg">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+                <span class="text-xs sm:text-sm font-semibold text-charcoal block">How Loved You Are</span>
+            </button>
+
+            <button onclick="selectMood('wish')" class="mood-btn p-4 rounded-2xl bg-white border border-roseGoldLight/40 hover:border-roseGold text-center transition-all duration-300 hover:-translate-y-1 shadow-sm" data-mood="wish">
+                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-blushPink flex items-center justify-center text-roseGold text-lg">
+                    <i class="fa-solid fa-wand-sparkles"></i>
+                </div>
+                <span class="text-xs sm:text-sm font-semibold text-charcoal block">Before Your Wish</span>
+            </button>
+
+            <button onclick="selectMood('tonight')" class="mood-btn p-4 rounded-2xl bg-white border border-roseGoldLight/40 hover:border-roseGold text-center transition-all duration-300 hover:-translate-y-1 shadow-sm" data-mood="tonight">
+                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-blushPink flex items-center justify-center text-roseGold text-lg">
+                    <i class="fa-solid fa-moon"></i>
+                </div>
+                <span class="text-xs sm:text-sm font-semibold text-charcoal block">End of the Day</span>
+            </button>
+        </div>
+
+        <!-- Note Display Card -->
+        <div id="moodCard" class="glass-card rounded-3xl p-6 sm:p-10 relative min-h-[200px] flex flex-col justify-center transition-all duration-500 transform border-l-4 border-l-roseGold">
+            <div id="moodContent" class="space-y-4">
+                <div class="flex items-center gap-3 text-roseGold">
+                    <i class="fa-solid fa-envelope-open-text text-2xl"></i>
+                    <h3 id="moodTitle" class="font-serif text-xl sm:text-2xl font-bold text-softWine">Select a message above...</h3>
+                </div>
+                <p id="moodText" class="text-base sm:text-lg text-charcoal/80 leading-relaxed font-sans italic">
+                    "Choose an envelope whenever you want a sweet birthday moment!"
+                </p>
+                <div id="moodFooter" class="pt-2 text-right text-xs font-semibold uppercase tracking-wider text-roseGold">
+                    — Yours Always
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: HEARTFELT BIRTHDAY MESSAGES GRID -->
+    <section id="notes" class="py-20 px-4 max-w-6xl mx-auto relative z-10">
+        <div class="text-center mb-16">
+            <span class="text-xs font-bold uppercase tracking-widest text-roseGold block mb-2">Birthday Blessings</span>
+            <h2 class="font-serif text-3xl sm:text-5xl font-bold text-softWine">Wishes Sent With Love</h2>
+            <div class="w-16 h-1 bg-roseGoldLight mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <!-- Card 1 -->
+            <div class="glass-card glass-card-hover rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute -top-10 -right-10 w-28 h-28 bg-blushPink rounded-full transition-transform group-hover:scale-150 duration-500 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-blushPink flex items-center justify-center text-roseGold text-xl mb-6 shadow-inner">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                    <h3 class="font-serif text-2xl font-bold text-softWine mb-4">Another Beautiful Year</h3>
+                    <p class="text-charcoal/80 leading-relaxed text-sm sm:text-base">
+                        Buhle, watching you grow and shine over this past year has been one of my absolute favorite things. May this new chapter bring you unlimited peace, health, and joy!
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-roseGoldLight/30 flex justify-between items-center text-xs text-roseGold font-medium">
+                    <span>Wish #01</span>
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="glass-card glass-card-hover rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute -top-10 -right-10 w-28 h-28 bg-blushPink rounded-full transition-transform group-hover:scale-150 duration-500 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-blushPink flex items-center justify-center text-roseGold text-xl mb-6 shadow-inner">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+                    <h3 class="font-serif text-2xl font-bold text-softWine mb-4">Pure Magic & Grace</h3>
+                    <p class="text-charcoal/80 leading-relaxed text-sm sm:text-base">
+                        Your heart is pure gold and your smile brightens everything around you. I hope today you feel completely spoiled and showered with all the love you deserve.
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-roseGoldLight/30 flex justify-between items-center text-xs text-roseGold font-medium">
+                    <span>Wish #02</span>
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="glass-card glass-card-hover rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute -top-10 -right-10 w-28 h-28 bg-blushPink rounded-full transition-transform group-hover:scale-150 duration-500 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-blushPink flex items-center justify-center text-roseGold text-xl mb-6 shadow-inner">
+                        <i class="fa-solid fa-infinity"></i>
+                    </div>
+                    <h3 class="font-serif text-2xl font-bold text-softWine mb-4">Cheering You On Always</h3>
+                    <p class="text-charcoal/80 leading-relaxed text-sm sm:text-base">
+                        Whatever dreams you hold in your heart for this year ahead, I promise to stand by your side, encouraging you every step of the way. Happy Birthday, my love!
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-roseGoldLight/30 flex justify-between items-center text-xs text-roseGold font-medium">
+                    <span>Wish #03</span>
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: GRATITUDE / COMPLIMENT GENERATOR -->
+    <section id="reasons" class="py-20 px-4 relative z-10">
+        <div class="max-w-4xl mx-auto glass-card rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden border border-roseGoldLight/50">
+            <div class="w-16 h-16 rounded-full bg-blushPink text-roseGold flex items-center justify-center mx-auto mb-6 text-2xl animate-pulse">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            
+            <span class="text-xs font-bold uppercase tracking-widest text-roseGold block mb-2">Birthday Appreciation</span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-softWine mb-6">Reasons I'm Grateful for Buhle</h2>
+            
+            <div class="min-h-[100px] flex items-center justify-center px-4 my-4">
+                <p id="reasonDisplay" class="font-serif text-xl sm:text-2xl text-softWine/90 italic transition-opacity duration-300">
+                    "Click the button below to generate a reason why you make the world so special!"
+                </p>
+            </div>
+
+            <button onclick="generateReason()" class="mt-6 px-8 py-4 rounded-full bg-roseGold hover:bg-softWine text-white font-medium shadow-md shadow-roseGold/20 hover:shadow-roseGold/40 transition-all duration-300 inline-flex items-center gap-3 group">
+                <i class="fa-solid fa-dice-d20 group-hover:rotate-180 transition-transform duration-500"></i>
+                <span>Get Another Reason</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- SECTION: VIRTUAL BIRTHDAY ENVELOPE -->
+    <section class="py-16 px-4 max-w-3xl mx-auto text-center relative z-10">
+        <div class="glass-card rounded-3xl p-8 sm:p-12 border border-roseGoldLight/60">
+            <h3 class="font-serif text-2xl sm:text-3xl font-bold text-softWine mb-4">Your Birthday Love Letter</h3>
+            <p class="text-sm text-charcoal/70 mb-6">Tap the envelope to unseal your birthday message.</p>
+
+            <div id="envelope" onclick="revealSecret()" class="cursor-pointer bg-blushPink border-2 border-dashed border-roseGoldLight rounded-2xl p-8 hover:border-roseGold transition-all duration-300 group relative">
+                <div id="envelopeIcon" class="text-4xl text-roseGold group-hover:scale-110 transition-transform mb-3">
+                    <i class="fa-solid fa-envelope-open text-roseGold"></i>
+                </div>
+                <span id="envelopeHint" class="text-xs font-semibold uppercase tracking-wider text-softWine">Tap to Open Letter</span>
+                
+                <div id="secretMessage" class="hidden text-left space-y-4 pt-2">
+                    <p class="font-cursive text-3xl text-softWine border-b border-roseGoldLight/40 pb-2">Dearest Buhle,</p>
+                    <p class="text-sm sm:text-base text-charcoal/80 leading-relaxed font-sans">
+                        On your birthday, I want to thank you for simply being you. Your warmth, gentleness, strength, and infectious smile bring so much light into my life. May this new year of life bring you endless happiness, fulfilled dreams, and memories as wonderful as you are.
+                    </p>
+                    <p class="text-sm text-roseGold font-semibold text-right pt-4">Happy Birthday With All My Heart ❤️</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12 border-t border-roseGoldLight/30 text-center relative z-10 text-charcoal/60 text-xs sm:text-sm">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col items-center gap-3">
+            <div class="flex items-center gap-2 text-roseGold text-lg">
+                <i class="fa-solid fa-cake-candles"></i>
+            </div>
+            <p class="font-serif text-base text-softWine font-medium">Happy Birthday Buhle!</p>
+            <p class="text-charcoal/50">Made specially for your big day ✨</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* Web Audio API Chime Feedback for Candle Blow */
+        function playChimeSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5
+
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch (e) {
+                // Audio Context muted/blocked by browser policy safely ignored
+            }
+        }
+
+        /* Ambient Heart/Star Particles Canvas */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class FloatingParticle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + 20 + Math.random() * 50;
+                this.size = Math.random() * 10 + 6;
+                this.speedY = Math.random() * 0.8 + 0.3;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.4 + 0.15;
+                this.isStar = Math.random() > 0.5;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += Math.sin(this.y * 0.01) * 0.4 + this.speedX;
+                if (this.y < -30) this.reset();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = '#B76E79';
+
+                if (this.isStar) {
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * this.size,
+                                   -Math.sin((18 + i * 72) * Math.PI / 180) * this.size);
+                        ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (this.size / 2),
+                                   -Math.sin((54 + i * 72) * Math.PI / 180) * (this.size / 2));
+                    }
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    const d = this.size;
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-d / 2, -d / 2, -d, d / 3, 0, d);
+                    ctx.bezierCurveTo(d, d / 3, d / 2, -d / 2, 0, 0);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        const particles = Array.from({ length: 25 }, () => new FloatingParticle());
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        
+        window.onload = function() {
+            animateCanvas();
+            setTimeout(triggerBirthdayCelebration, 500);
+        };
+
+        /* Candle Blowing Logic */
+        let blownOutCount = 0;
+        function blowCandle(id) {
+            const candle = document.getElementById(id);
+            if (!candle.classList.contains('candle-out')) {
+                candle.classList.add('candle-out');
+                blownOutCount++;
+                playChimeSound();
+
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 25,
+                        spread: 40,
+                        origin: { y: 0.6 }
+                    });
+                }
+
+                if (blownOutCount === 3) {
+                    const statusText = document.getElementById('candleStatus');
+                    statusText.textContent = "🎉 Wish Granted! Happy Birthday Buhle! 🎉";
+                    statusText.classList.add('text-roseGold', 'font-bold');
+                    triggerBirthdayCelebration();
+                }
+            }
+        }
+
+        function relightCandles() {
+            ['candle1', 'candle2', 'candle3'].forEach(id => {
+                document.getElementById(id).classList.remove('candle-out');
+            });
+            blownOutCount = 0;
+            const statusText = document.getElementById('candleStatus');
+            statusText.textContent = "Tap or click each candle flame to blow it out!";
+            statusText.classList.remove('text-roseGold', 'font-bold');
+        }
+
+        /* Birthday Celebration Burst with Fallback */
+        function triggerBirthdayCelebration() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 90,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'click-heart text-roseGold';
+                    heart.style.left = `${Math.random() * (window.innerWidth - 40) + 20}px`;
+                    heart.style.top = `${window.innerHeight + 20}px`;
+                    
+                    const icons = ['fa-solid fa-cake-candles', 'fa-solid fa-heart', 'fa-solid fa-star'];
+                    const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+                    heart.innerHTML = `<i class="${randomIcon} text-2xl"></i>`;
+                    
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), 1200);
+                }, i * 60);
+            }
+        }
+
+        /* Birthday Mood Selector */
+        const moodData = {
+            morning: {
+                title: "Read First Thing In The Morning 🌅",
+                text: "Good morning and HAPPY BIRTHDAY Buhle! Today is all about celebrating you. Take a deep breath, smile, and know that you are loved beyond words!"
+            },
+            valued: {
+                title: "How Much You Mean To Me ❤️",
+                text: "Buhle, your presence makes every single day brighter. You bring warmth, beauty, and happiness to everyone fortunate enough to know you."
+            },
+            wish: {
+                title: "Before You Make Your Wish ✨",
+                text: "Before blowing out your birthday candles, know that my biggest wish has already come true: having you in my life. Now make yours count!"
+            },
+            tonight: {
+                title: "End of the Day Reflection 🌙",
+                text: "As your special day winds down, I hope your heart is full of happiness and beautiful memories. Here's to a year filled with endless blessings!"
+            }
+        };
+
+        function selectMood(moodKey) {
+            const data = moodData[moodKey];
+            if (!data) return;
+
+            const moodCard = document.getElementById('moodCard');
+            const titleEl = document.getElementById('moodTitle');
+            const textEl = document.getElementById('moodText');
+
+            moodCard.style.opacity = '0';
+            moodCard.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                titleEl.textContent = data.title;
+                textEl.textContent = `"${data.text}"`;
+
+                moodCard.style.opacity = '1';
+                moodCard.style.transform = 'translateY(0)';
+            }, 250);
+
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                if (btn.dataset.mood === moodKey) {
+                    btn.classList.add('border-roseGold', 'bg-blushPink/50', 'shadow-md');
+                } else {
+                    btn.classList.remove('border-roseGold', 'bg-blushPink/50', 'shadow-md');
+                }
+            });
+        }
+
+        /* Gratitude Generator Data */
+        const reasons = [
+            "Your infectious smile that immediately lights up the entire room.",
+            "The gentle and compassionate way you care for people around you.",
+            "Your strength and grace in everything you undertake.",
+            "How effortlessly you make ordinary days feel celebratory.",
+            "Your intelligence, witty humor, and brilliant mind.",
+            "The way you listen with full heart and genuine attention.",
+            "Because you are uniquely, wonderfully Buhle—and no one else compares!"
+        ];
+
+        let lastIdx = -1;
+        function generateReason() {
+            const display = document.getElementById('reasonDisplay');
+            let nextIdx;
+            do {
+                nextIdx = Math.floor(Math.random() * reasons.length);
+            } while (nextIdx === lastIdx && reasons.length > 1);
+            
+            lastIdx = nextIdx;
+
+            display.style.opacity = '0';
+            setTimeout(() => {
+                display.textContent = `"${reasons[nextIdx]}"`;
+                display.style.opacity = '1';
+            }, 200);
+        }
+
+        /* Secret Letter Reveal */
+        let isOpen = false;
+        function revealSecret() {
+            if (!isOpen) {
+                document.getElementById('envelopeHint').classList.add('hidden');
+                document.getElementById('envelopeIcon').innerHTML = '<i class="fa-solid fa-heart-circle-check text-roseGold"></i>';
+                document.getElementById('secretMessage').classList.remove('hidden');
+                triggerBirthdayCelebration();
+                isOpen = true;
+            }
+        }
+    </script>
+</body>
+</html> 
